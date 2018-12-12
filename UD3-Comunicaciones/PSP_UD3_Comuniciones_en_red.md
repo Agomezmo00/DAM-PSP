@@ -1,11 +1,11 @@
-#Programación de comunicaciones en red
+# Programación de comunicaciones en red
 
-##Introducción
-##Clases Java para comunicaciones en red
+## Introducción
+## Clases Java para comunicaciones en red
 
 TCP/IP es una familia de protocolos para permitir la comunicación entre cualquier par de ordenadores de cualquier red o fabricante, respetando los protocolos de cada red individual. Afecta a 4 capas:
 
-###Niveles OSI
+### Niveles OSI
 * Físico
 * Enlace
 	* Es la interfaz con la red real. Comunica la capa de red con la física (el hardware).
@@ -24,11 +24,11 @@ Los equipos conectados a internet utilizan el procotolo TCP o UDP. Hay alguna di
 * TCP: Orientado a conexión. Se busca garantizar que los paquetes lleguen y que lo hagan de forma ordenada (conforme han sido enviados).
 * UDP: No Orientado a conexión. Se envian datagramas sin garantizar que lleguen ni que lo hagan de forma ordenada.
 
-###Los puertos
+### Los puertos
 TCP y UDP utilizan puertos para asignar datos entrantes a un proceso en particular que se ejecuta en una máquina. Los datos transmitidos a través de Internet identifican la máquina y el puerto al que van destinados. Se destinan 32 bits (IPv4) para la máquina y 16 para el puerto. TCP una aplicación de servidor vincula un socket a un número de puerto específico, lo que supone registrar el servidor en el sistema para recibir los datos destinados a ese puerto. Por otro lado, en UDP el número de puerto se adjunta al datagrama para llegar a la aplicación correcta.
 
 
-##Las clases
+## Las clases
 Cuando se escriben programas en Java, se trabaja a nivel de aplicación y se abstraen los protocolos de red mediante las clases presentes en el package *java.net* que incluye varias clases:
 
 * URL; Cuyos objetos representan un puntero a un recurso en la Web.
@@ -38,7 +38,7 @@ Cuando se escriben programas en Java, se trabaja a nivel de aplicación y se abs
 * InetAddress para representar direcciones de Internet. Tiene dos subclases *Inet4Address* e *Inet6Address*, aunque en la mayoría de los casos con la clase principal suele ser suficiente. Algunos de los métodos más relevantes de *InetAddress* son:
 
 
-###La clase InetAddress
+### La clase InetAddress
 
 Algunos de los métodos más relevantes de *InetAddress* son:
 
