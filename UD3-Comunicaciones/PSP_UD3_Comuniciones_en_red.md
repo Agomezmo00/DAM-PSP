@@ -49,6 +49,42 @@ Algunos de los métodos más relevantes de *InetAddress* son:
 * String getHostName() Devuelve el nombre del host de un objeto InetAddress.
 * String getCanonicalHostName() Obtiene el nombre canónico completo (suele ser la dirección real del host) de un objeto InetAddress.
 
+### Los Sockets
+
+* Socket designa un concepto abstracto por el cual dos programas (posiblemente situados en computadoras distintas) pueden intercambiar cualquier flujo de datos, generalmente de manera fiable y ordenada.
+
+El término socket es también usado como el nombre de una interfaz de programación de aplicaciones (API) para la familia de protocolos de Internet TCP/IP, provista usualmente por el sistema operativo.
+
+Los sockets de Internet constituyen el mecanismo para la entrega de paquetes de datos provenientes de la tarjeta de red a los procesos o hilos apropiados. Un socket queda definido por un par de direcciones IP local y remota, un protocolo de transporte y un par de números de puerto local y remoto. * Fuente: [Wikipedia, socket](https://es.wikipedia.org/wiki/Socket_de_Internet)
+
+En nuestro contexto, los socket nos proporcionan los extremos de la comunicación entre aplicaciones y/o procesos. Es por lo tanto, un conector. Dicho conector debe tener asociados dos campos; dirección IP del equipo de destino y puerto local asignado a la aplicación.
+
+
+### La clase ServerSocket (SOCKET TCP)
+
+Viene incluida en java.net e implementa el lado del servidor en la comunicación. Establece un conector en el puerto que *escucha* las peticiones de los clientes.
+
+### La clase Socket (SOCKET TCP)
+
+También incluida en java.net, implementa el extremo de la conexión. 
+
+### Proceso de gestión simple de Socket TCP
+
+1. El programa servidor crea un socket servidor definiendo un puerto.
+2. En caso de que el cliente solicite conectarse, debe aceptarlo mediante *accept()*. 
+3. El cliente establecerá conexión a través del puerto especificado mediante *Socket(host, port)*.
+4. Cliente y servidor se comunican mediante flujos *InputStream* y *OutputStream*
+
+Pasos que se deben seguir:
+
+1. Apertura de sockets
+2. Creación de flujos (o Streams) de entrada
+3. Creación de flujos de salida
+4. Cierre de sockets
+
+
+
+
 
 
 
