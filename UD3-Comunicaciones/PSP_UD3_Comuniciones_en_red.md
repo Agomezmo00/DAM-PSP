@@ -294,3 +294,15 @@ public class TCPObjetoCliente1 {
   }
 }
 ```
+
+### Envío de objetos mediante sockets basados en UDP
+
+Para poder hacer el intercambio de objetos Java mediante sockets UDP se pueden utilizar las clases [ByteArrayOutputStream](https://docs.oracle.com/javase/7/docs/api/java/io/ByteArrayOutputStream.html) y [ByteArrayInputStream](https://docs.oracle.com/javase/7/docs/api/java/io/ByteArrayInputStream.html). Como se supondrá, el objeto debe convertirse en un array de bytes.
+
+
+## Gestión de clientes múltiples (threads)
+
+Cuando se necesita que un servidor pueda atender a más de un cliente de forma simultánea, se impone la necesidad de la programación *multihilo* de manera que cada cliente pueda ser atendido por un hilo. 
+
+
+
