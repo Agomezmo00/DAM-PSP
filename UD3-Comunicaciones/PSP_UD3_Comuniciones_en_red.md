@@ -305,4 +305,112 @@ Para poder hacer el intercambio de objetos Java mediante sockets UDP se pueden u
 Cuando se necesita que un servidor pueda atender a más de un cliente de forma simultánea, se impone la necesidad de la programación *multihilo* de manera que cada cliente pueda ser atendido por un hilo. 
 
 
+El esquema más sencillo para el protocolo TCP pasaría por implementar un único servidor con el método __accept()__ incluido en un bucle infinito de manera que espere las peticiones que vayan llegando desde los clientes. Cabe recordar que dicho método devuelve un objeto __Socket__ que se empleará para crear un hilo que atenderá al cliente en cuestión y una vez hecho esto, se vuelve a llamar a __accept()__ para que vuelva a escuchar peticiones.
 
+```java 
+import java.io.*;
+import java.net.*;
+
+public class Servidor {
+    public static void main(String args[]) throws IOException  {
+        ServerSocket servidor;      
+        servidor = new ServerSocket(6000);
+        System.out.println("Servidor iniciado...");
+        
+        while (true) {  
+            Socket cliente = new Socket();
+            cliente=servidor.accept();//esperando cliente   
+            HiloServidor hilo = new HiloServidor(cliente);
+            hilo.start();       
+        }
+    }
+}
+```
+Las operaciones de un cliente concreto se gestionan por el hilo, lo que permite que el servidor se mantenga a la escucha y no interrumpa su proceso mientras que los clientes ven resueltas sus peticiones. Vemos un algoritmo en el que el servidor devolverá la cadena recibida pero en mayúsculas hasta que reciba un asterisco.
+
+```java
+import java.io.*;
+import java.net.*;
+
+public class HiloServidor extends Thread {
+    BufferedReader fentrada;
+    PrintWriter fsalida;
+    Socket socket = null;
+
+    public HiloServidor(Socket s) throws IOException {// CONSTRUCTOR
+        socket = s;
+        // se crean flujos de entrada y salida
+        fsalida = new PrintWriter(socket.getOutputStream(), true);
+        fentrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    }
+
+    public void run() {// tarea a realizar con el cliente
+        String cadena = "";
+
+        System.out.println("COMUNICO CON: " + socket.toString());
+
+        while (!cadena.trim().equals("*")) {
+
+            try {
+                cadena = fentrada.readLine();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } // obtener cadena
+            fsalida.println(cadena.trim().toUpperCase());// enviar mayúscula
+        } // fin while
+
+        System.out.println("FIN CON: " + socket.toString());
+
+        fsalida.close();
+        try {
+            fentrada.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+}
+```
+El cliente de ejemplo que recoge la cadena y la envía al servidor mientras que no se introduzca un asterisco, en este caso a través del puerto 6000.
+
+```java
+public class Cliente {
+  public static void main(String[] args) throws IOException {
+    String Host = "localhost";
+    int Puerto = 6000;// puerto remoto
+    Socket Cliente = new Socket(Host, Puerto);
+        
+    // CREO FLUJO DE SALIDA AL SERVIDOR 
+    PrintWriter fsalida = new PrintWriter (Cliente.getOutputStream(), true);
+    // CREO FLUJO DE ENTRADA AL SERVIDOR    
+    BufferedReader fentrada =  new BufferedReader
+         (new InputStreamReader(Cliente.getInputStream()));
+         
+    // FLUJO PARA ENTRADA ESTANDAR
+    BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    String cadena, eco="";
+        
+    
+    do{ 
+        System.out.print("Introduce cadena: ");
+        cadena = in.readLine();
+        fsalida.println(cadena);
+        eco=fentrada.readLine();            
+        System.out.println("  =>ECO: "+eco);    
+    } while(!cadena.trim().equals("*"));
+        
+    fsalida.close();
+    fentrada.close();
+    System.out.println("Fin del envío... ");
+    in.close();
+    Cliente.close();
+    }//
+}//
+```
