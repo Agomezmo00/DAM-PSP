@@ -356,6 +356,28 @@ public class Servidor {
 
 En este caso por ejemplo, el cliente envía una cadena al servidor que éste devuelve en mayúsculas hasta que reciba un asterisco (que finaliza la conexión con el cliente). En la clase _HiloServidor_ se hace la gestión de cada cliente.
 
+
+```java 
+import java.io.*;
+import java.net.*;
+
+public class Servidor {
+    public static void main(String args[]) throws IOException  {
+        ServerSocket servidor;      
+        servidor = new ServerSocket(6000);
+        System.out.println("Servidor iniciado...");
+        
+        while (true) {  
+            Socket cliente = new Socket();
+            cliente=servidor.accept();//esperando cliente   
+            HiloServidor hilo = new HiloServidor(cliente);
+            hilo.start();       
+        }
+    }
+}
+```
+Las operaciones de un cliente concreto se gestionan por el hilo, lo que permite que el servidor se mantenga a la escucha y no interrumpa su proceso mientras que los clientes ven resueltas sus peticiones. Vemos un algoritmo en el que el servidor devolverá la cadena recibida pero en mayúsculas hasta que reciba un asterisco.
+
 ```java
 import java.io.*;
 import java.net.*;
@@ -410,38 +432,36 @@ public class HiloServidor extends Thread {
 Para el cliente, podria servir alguno de los ya vistos en las secciones previas. Por ejemplo el siguiente:
 
 ```java
-import java.io.*;
-import java.net.*;
-
 public class Cliente {
   public static void main(String[] args) throws IOException {
-  String Host = "localhost";
-  int Puerto = 6000;// puerto remoto
-  Socket Cliente = new Socket(Host, Puerto);
+    String Host = "localhost";
+    int Puerto = 6000;// puerto remoto
+    Socket Cliente = new Socket(Host, Puerto);
+        
+    // CREO FLUJO DE SALIDA AL SERVIDOR 
+    PrintWriter fsalida = new PrintWriter (Cliente.getOutputStream(), true);
+    // CREO FLUJO DE ENTRADA AL SERVIDOR    
+    BufferedReader fentrada =  new BufferedReader
+         (new InputStreamReader(Cliente.getInputStream()));
+         
+    // FLUJO PARA ENTRADA ESTANDAR
+    BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    String cadena, eco="";
+        
     
-  // CREO FLUJO DE SALIDA AL SERVIDOR 
-  PrintWriter fsalida = new PrintWriter (Cliente.getOutputStream(), true);
-  // CREO FLUJO DE ENTRADA AL SERVIDOR  
-  BufferedReader fentrada =  new BufferedReader(new InputStreamReader(Cliente.getInputStream()));
-     
-  // FLUJO PARA ENTRADA ESTANDAR
-  BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-  String cadena, eco="";
-    
-  
-  do{ 
-    System.out.print("Introduce cadena: ");
-    cadena = in.readLine();
-    fsalida.println(cadena);
-    eco=fentrada.readLine();      
-    System.out.println("  =>ECO: "+eco);  
-  } while(!cadena.trim().equals("*"));
-    
-  fsalida.close();
-  fentrada.close();
-  System.out.println("Fin del envío... ");
-  in.close();
-  Cliente.close();
-  }
+    do{ 
+        System.out.print("Introduce cadena: ");
+        cadena = in.readLine();
+        fsalida.println(cadena);
+        eco=fentrada.readLine();            
+        System.out.println("  =>ECO: "+eco);    
+    } while(!cadena.trim().equals("*"));
+        
+    fsalida.close();
+    fentrada.close();
+    System.out.println("Fin del envío... ");
+    in.close();
+    Cliente.close();
+    }
 }
 ```
