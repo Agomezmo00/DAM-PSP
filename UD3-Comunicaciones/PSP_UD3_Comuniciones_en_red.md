@@ -322,7 +322,7 @@ DatagramPacket paqRecibido = new DatagramPacket(recibido, recibido.length);
 socket.receive(paqRecibido);
 
 //Pasamos bytes a objeto
-ByteArrayInputStream bais = new ByteArrayInputStream();
+ByteArrayInputStream bais = new ByteArrayInputStream(recibido);
 ObjectInputStream in = new ObjectInputStream(bais);
 Persona persona = (Persona)in.readObject(); //Se obtiene el objeto recibido como bytes
 in.close();
