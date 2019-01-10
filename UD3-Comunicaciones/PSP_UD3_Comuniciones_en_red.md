@@ -299,10 +299,149 @@ public class TCPObjetoCliente1 {
 
 Para poder hacer el intercambio de objetos Java mediante sockets UDP se pueden utilizar las clases [ByteArrayOutputStream](https://docs.oracle.com/javase/7/docs/api/java/io/ByteArrayOutputStream.html) y [ByteArrayInputStream](https://docs.oracle.com/javase/7/docs/api/java/io/ByteArrayInputStream.html). Como se supondrá, el objeto debe convertirse en un array de bytes.
 
+```java 
+Persona persona = new Persona("Juan", 25);
+
+// OBJETO A BYTES
+ByteArrayOutputStream baos = new ByteArrayOutputStream();
+ObjectOutputStream out = new ObjectOutputStream(baos);
+
+out.writeObject(persona); //Se escribe el objeto persona en el stream
+
+out.close(); // Se cierra el stream
+
+byte[] bytes = baos.toByteArray(); // se toma  el objeto transformado en bytes
+
+/* 
+ * En cambio, para los datos recibidos (bytes) por el datagrama en un objeto Persona habría que hacer lo siguiente:
+*/
+
+// BYTES A OBJETO
+byte[] recibido = new byte[1024];
+DatagramPacket paqRecibido = new DatagramPacket(recibido, recibido.length);
+socket.receive(paqRecibido);
+
+//Pasamos bytes a objeto
+ByteArrayInputStream bais = new ByteArrayInputStream();
+ObjectInputStream in = new ObjectInputStream(bais);
+Persona persona = (Persona)in.readObject(); //Se obtiene el objeto recibido como bytes
+in.close();
+```
+
 
 ## Gestión de clientes múltiples (threads)
 
 Cuando se necesita que un servidor pueda atender a más de un cliente de forma simultánea, se impone la necesidad de la programación *multihilo* de manera que cada cliente pueda ser atendido por un hilo. 
 
+En TCP, la filosofía básica es crear un servidor común que acepte las peticiones de los clientes, pero de forma que cada una de ellas sea gestionada por un _hilo_ diferente. 
 
+```java
+import java.io.*;
+import java.net.*;
 
+public class Servidor {
+  public static void main(String args[]) throws IOException  {
+    ServerSocket servidor;    
+    servidor = new ServerSocket(6000);
+    
+    while (true) {  
+      Socket cliente = new Socket();
+      cliente=servidor.accept();//esperando cliente 
+      HiloServidor hilo = new HiloServidor(cliente);
+      hilo.start();   
+    }
+  }
+}
+```
+
+En este caso por ejemplo, el cliente envía una cadena al servidor que éste devuelve en mayúsculas hasta que reciba un asterisco (que finaliza la conexión con el cliente). En la clase _HiloServidor_ se hace la gestión de cada cliente.
+
+```java
+import java.io.*;
+import java.net.*;
+
+public class HiloServidor extends Thread {
+  BufferedReader fentrada;
+  PrintWriter fsalida;
+  Socket socket = null;
+
+  public HiloServidor(Socket s) throws IOException {// CONSTRUCTOR
+    socket = s;
+    // se crean flujos de entrada y salida
+    fsalida = new PrintWriter(socket.getOutputStream(), true);
+    fentrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+  }
+
+  public void run() {// tarea a realizar con el cliente
+    String cadena = "";
+
+    System.out.println("COMUNICO CON: " + socket.toString());
+
+    while (!cadena.trim().equals("*")) {
+
+      try {
+        cadena = fentrada.readLine();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } // obtener cadena
+      fsalida.println(cadena.trim().toUpperCase());// enviar mayúscula
+    } // fin while
+
+    System.out.println("FIN CON: " + socket.toString());
+
+    fsalida.close();
+    try {
+      fentrada.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      socket.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+Para el cliente, podria servir alguno de los ya vistos en las secciones previas. Por ejemplo el siguiente:
+
+```java
+import java.io.*;
+import java.net.*;
+
+public class Cliente {
+  public static void main(String[] args) throws IOException {
+  String Host = "localhost";
+  int Puerto = 6000;// puerto remoto
+  Socket Cliente = new Socket(Host, Puerto);
+    
+  // CREO FLUJO DE SALIDA AL SERVIDOR 
+  PrintWriter fsalida = new PrintWriter (Cliente.getOutputStream(), true);
+  // CREO FLUJO DE ENTRADA AL SERVIDOR  
+  BufferedReader fentrada =  new BufferedReader(new InputStreamReader(Cliente.getInputStream()));
+     
+  // FLUJO PARA ENTRADA ESTANDAR
+  BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+  String cadena, eco="";
+    
+  
+  do{ 
+    System.out.print("Introduce cadena: ");
+    cadena = in.readLine();
+    fsalida.println(cadena);
+    eco=fentrada.readLine();      
+    System.out.println("  =>ECO: "+eco);  
+  } while(!cadena.trim().equals("*"));
+    
+  fsalida.close();
+  fentrada.close();
+  System.out.println("Fin del envío... ");
+  in.close();
+  Cliente.close();
+  }
+}
+```
