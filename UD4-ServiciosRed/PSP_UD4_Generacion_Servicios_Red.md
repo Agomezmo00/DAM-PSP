@@ -45,8 +45,7 @@ Este tipo de FTP tiene un grave problema de seguridad; el cliente puede aceptar 
 
 Los equipos con cortafuegos, rechazan estas conexiones aleatorias.
 
-
-[logo]: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTPactive.JPG "Esquema Modo Activo. Fuente: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTPactive.JPG"
+![alt-text](http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTPactive.JPG "Esquema Modo Activo. Fuente: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTPactive.JPG")
 
 
 * Modo Pasivo
@@ -62,7 +61,7 @@ En este caso, no se utiliza el canal de datos del puerto 20 del servidor, a dife
 Antes de cada nueva transferencia en cualquiera de los modos, el cliente debe enviar otra vez un comando control, ya sea PORT o PASV.
 
 
-[logo]: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTP_Passive.jpg "Esquema Modo Pasivo. Fuente: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTP_Passive.jpg"
+![alt-text](http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTP_Passive.jpg "Esquema Modo Pasivo. Fuente: http://www.worldofintegration.com/sites/default/files/pictures_for_content/WOI_protocols/FTP_Passive.jpg")
 
 #### Códigos de respuesta en FTP
 
