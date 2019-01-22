@@ -107,7 +107,33 @@ Vemos ejemplos de código.
 [Ejemplo Descarga Carpeta](https://es.stackoverflow.com/questions/115650/descargar-una-carpeta-de-ftp-desde-java-usando-ftpclient-apache-commons-net)
 
 
-### Servidor FTP en Java
-
 ## Protocolo SMTP
-## Servidores de ficheros
+
+[SMTP (Simple Mail Transfer Protocol)](https://es.mailjet.com/blog/news/servidor-smtp/) es el protocolo habitual usado en Internet para el envío de correos electrónicos. 
+
+El funcionamiento del protocolo se produce mediante comandos de texto y el puerto habitualmente utilizado es el 25. El servidor responde a cada comando ejecutado por el cliente con un [código](https://www.greenend.org.uk/rjk/tech/smtpreplies.html) y un mensaje de respuesta. 
+
+### Configuración del servidor
+[XAMPP](https://www.apachefriends.org/es/download.html) incorpora Mercury, y hay abundancia de [tutoriales](http://00l1.blogspot.com/2010/06/como-enviar-correos-desde-localhost-con.html) sobre la configuración del servidor en nuestro equipo local.
+
+Para probarlo una vez configurado, es posible probar el envío de emails mediante el [cliente Telnet, ejemplo](https://docs.microsoft.com/es-es/exchange/mail-flow/test-smtp-with-telnet?view=exchserver-2019) que incorpora Windows 10. En caso de no tener el cliente Telnet activado habrá que ir a la configuración de aplicaciones y activarlo.
+
+
+#### Comandos básicos SMTP
+
+| COMANDO | Función |
+| ---------- | ---------- |
+| HELO | Iniciar una sesión con el servidor. |
+|MAIL FROM |	Identificación del emisor. |
+|RCPT TO |	Identificación del destinatario.|
+|DATA	| Comienzo del mensaje.|
+|QUIT	| Finalización de la sesión.|
+
+### Comunicación con el servidor SMTP mediante JAVA
+
+
+
+
+
+
+## Servidores Java
