@@ -120,6 +120,8 @@ El funcionamiento del protocolo se produce mediante comandos de texto y el puert
 
 Para probarlo una vez configurado, es posible probar el envío de emails mediante el [cliente Telnet, ejemplo](https://docs.microsoft.com/es-es/exchange/mail-flow/test-smtp-with-telnet?view=exchserver-2019) que incorpora Windows 10. En caso de no tener el cliente Telnet activado habrá que ir a la configuración de aplicaciones y activarlo.
 
+[otro ejemplo]:(http://amestoy.info/enviar-correo-via-smtp-utilizando-telnet/)
+
 
 #### Comandos básicos SMTP
 
