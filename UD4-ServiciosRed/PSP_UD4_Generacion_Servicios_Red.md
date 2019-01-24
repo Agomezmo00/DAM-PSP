@@ -116,6 +116,8 @@ El funcionamiento del protocolo se produce mediante comandos de texto y el puert
 ### Configuración del servidor
 [XAMPP](https://www.apachefriends.org/es/download.html) incorpora Mercury, y hay abundancia de [tutoriales](http://00l1.blogspot.com/2010/06/como-enviar-correos-desde-localhost-con.html) sobre la configuración del servidor en nuestro equipo local.
 
+* Nota sobre el uso de servidores externos (Gmail, Outlook, etc): Si desde nuestro servidor se pretende utilizar una cuenta correspondiente a cualquiera de estos proveedores, se debe facultar en el perfil de usuario correspondiente el [acceso a aplicaciones menos seguras](https://support.google.com/a/answer/6260879?hl=es). Esto conviene hacerlo únicamente con propósitos de prueba y sería recomendable desactivarlo una vez concluidas las pruebas.
+
 Para probarlo una vez configurado, es posible probar el envío de emails mediante el [cliente Telnet, ejemplo](https://docs.microsoft.com/es-es/exchange/mail-flow/test-smtp-with-telnet?view=exchserver-2019) que incorpora Windows 10. En caso de no tener el cliente Telnet activado habrá que ir a la configuración de aplicaciones y activarlo.
 
 
@@ -123,13 +125,295 @@ Para probarlo una vez configurado, es posible probar el envío de emails mediant
 
 | COMANDO | Función |
 | ---------- | ---------- |
-| HELO | Iniciar una sesión con el servidor. |
+| HELO o EHLO | Iniciar una sesión con el servidor. |
 |MAIL FROM |	Identificación del emisor. |
 |RCPT TO |	Identificación del destinatario.|
 |DATA	| Comienzo del mensaje.|
 |QUIT	| Finalización de la sesión.|
+|HELP	| Muestra la lista de comandos admitidos por el servidor.|
+
+Es posible consultar un listado más detallado de los [comandos SMTP](https://www.dsi.uclm.es/personal/miguelfgraciani/mikicurri/Docencia/LenguajesInternet0910/web_LI/Teoria/Protocolos%20de%20nivel%20de%20aplicacion/Material/Comandos%20del%20protocolo%20SMTP.htm)
 
 ### Comunicación con el servidor SMTP mediante JAVA
+
+*Apache Commons Net* proporciona la clase ___[SMTPClient](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTPClient.html)___ que reune la funcionalidad necesaria para enviar ficheros a través de un servidor SMTP. De forma análoga a otras clases derivadas de _SocketClient_, la clase __[SMTP](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTP.html)__ lo es, es necesario establecer conexión con el servidor antes de lanzar cualquier otra operación y es preciso desconectarse al terminarlas. 
+
+Una vez establecida la conexión al servidor, la clase ___[SMTPReply](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTPReply.html)___ recoge diversas constantes sobre los códigos de respuesta SMTP, aunque es conveniente poder consultar el listado completo ya visto previamente.
+
+A continuación, se muestra un ejemplo de cliente para enviar un mensaje simple de correo:
+
+```java
+import java.io.IOException;
+import java.net.ConnectException;
+
+import org.apache.commons.net.smtp.AuthenticatingSMTPClient;
+import org.apache.commons.net.smtp.SMTPClient;
+import org.apache.commons.net.smtp.SMTPReply;
+
+public class EnviarMensaje {
+
+	public static void main(String[] args) {
+		SMTPClient client = new SMTPClient();
+		try {
+			int respuesta;
+			client.connect("localhost");
+			System.out.print(client.getReplyString());
+			respuesta = client.getReplyCode();
+
+			if (!SMTPReply.isPositiveCompletion(respuesta)) {
+				client.disconnect();
+				System.err.println("Conexión rechazada por el servidor.");
+				System.exit(1);
+			}
+
+			client.login(); // inicio de sesión HELO
+			String destinatario = "gomezmorata@iestubalcain.net";
+			String mensaje = "Hola. \nEste mensaje se envía desde un cliente Java\n";
+			String remitente = "alumno@localhost.es";
+
+			if (client.sendSimpleMessage(remitente, destinatario, mensaje))
+				System.out.println("El mensaje se ha enviado a " + destinatario);
+			else
+				System.out.println("El mensaje no se ha podido enviar");
+
+			// final de sesión QUIT
+			client.logout();
+
+			client.disconnect();
+
+		}catch(ConnectException ce){
+			System.err.println("Servidor NO iniciado");			
+			System.err.println(ce.getMessage());
+			System.exit(2);
+		}
+		catch (IOException e) {
+			System.err.println("No se ha podido conectar al servidor");
+			e.printStackTrace();
+			System.exit(2);
+		}
+
+	}
+}
+```
+Si se usa el servidor Mercury incluido en el XAMPP es conveniente consultar los mensajes que va devolviendo el servidor SMTP. Si se produce un error de HELO incorrecto (SMTP 554), puede solucionarse de la siguiente manera:
+
+*In mercury logs, you will see this message ""554 Invalid HELO format" on valid HELOs/EHLO".
+It is due to the RFC compliance from mercury which isn't RFC compliant.
+Here is the fix :
+locate "transfltr.mer" in mercury folder, edit it with notepad or whatever.
+Locate this line at the end of the file :
+H, "[EHeh][EHeh]LO +[0-9]+.[0-9]+.[0-9]+.[0-9]", R, "554 Invalid HELO format"
+comment it out (add # at the begining of the line) restart the mail server then.
+If you want to turn mercury into RFC compliant, add this line above the one you commented out :
+H, "[EHeh][EHeh]LO +[0-9]+.[0-9]+.[0-9]+.[0-9]+.", X, ""*
+
+
+La clase __[SimpleSMTPHeader](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SimpleSMTPHeader.html)__ modela la construcción de la cabecera para el envío de emails. 
+
+```java
+import java.io.IOException;
+import java.io.Writer;
+import java.security.NoSuchAlgorithmException;
+
+import org.apache.commons.net.smtp.AuthenticatingSMTPClient;
+import org.apache.commons.net.smtp.SMTPClient;
+import org.apache.commons.net.smtp.SMTPReply;
+import org.apache.commons.net.smtp.SMTPSClient;
+import org.apache.commons.net.smtp.SimpleSMTPHeader;
+
+public class ClienteSMTPConHeaders {
+
+	public static void main(String[] args)  {
+		SMTPClient client= new SMTPClient();
+		 try {
+		      int respuesta;
+		      client.connect("localhost");
+		      System.out.print(client.getReplyString());
+		      respuesta = client.getReplyCode();
+
+		      if(!SMTPReply.isPositiveCompletion(respuesta)) {
+		        client.disconnect();
+		        System.err.println("SMTP server refused connection.");
+		        System.exit(1);
+		      }
+		      
+		      client.login();
+		    
+		      String remitente ="remitente@localhost.es";
+		      String destino1="fulanito@iestubalcain.net";
+		      String destino2="menganito@iestubalcain.net";		      
+		      String asunto="Prueba de SMTPClient con Headers";
+		      String mensaje = "Hola. \nEnviando prueba desde cliente Java con Headers\n";
+		      
+		      //se crea la cabecera
+		      SimpleSMTPHeader cabecera = new SimpleSMTPHeader
+		    		  (remitente , destino1, asunto);		      
+		      cabecera.addCC(destino2);
+		      
+		      //establecer el correo de origen
+		      client.setSender(remitente);
+		      
+		      //añadir correos destino 
+		      client.addRecipient(destino1);//hay que añadir los dos
+		      client.addRecipient(destino2);
+		     
+		      //se envia DATA al servidor
+		      Writer writer = client.sendMessageData();   
+		      if(writer == null) { //fallo	       
+		    	  System.out.println("Fallo al enviar DATA.");			     
+			      System.exit(1);
+		      }
+		      
+		      System.out.println(cabecera.toString());
+		      writer.write(cabecera.toString()); //primero escribo cabecera    
+	          writer.write(mensaje);//luego mensaje
+	          writer.close();
+	          
+	       	  if(!client.completePendingCommand())  { //fallo
+	       		  System.out.println("Fallo al finalizar la transacción.");			     
+			      System.exit(1);
+		      }
+		      
+	       	  client.logout(); 
+	          client.disconnect();
+	          
+		    } catch (IOException e) {
+				System.err.println("No se puede conectar al servidor.");
+				e.printStackTrace();
+				System.exit(2);
+			}
+		    
+		    System.exit(0);
+		}
+}
+```
+#### Mecanismos de autenticación
+
+La autenticación en el protocolo SMTP tiene como objetivo el aumento de los niveles de seguridad. De forma más general, busca evitar el uso de una dirección de correo de forma no autorizada. Se modela mediante la clase __[AuthenticatingSMTPClient](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/AuthenticatingSMTPClient.html)__, que extiende a __[SMTPSClient](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTPSClient.html)__. Cuando se usa este protocolo, los puertos pueden cambiar: 465, 587 se dan con frecuencia en lugar del 25 de STMP.
+
+A grandes rasgos, el empleo de estas clases supone la implementación de SMTP sobre SSL (Secure Socket Layer). TLS (Transport Layer Security) trabaja al nivel de la capa de transporte y supone una mejora sobre el SSL.
+
+El comando __[STARTTLS](https://es.wikipedia.org/wiki/STARTTLS)__ busca incorporar un mayor nivel de privacidad al envío de emails. Establece el cifrado de las comunicaciones entre cliente y servidor. 
+
+Mediante STMPSClient se pueden definir dos modos de seguridad; __explícito__ e __implícito__. En este último, la negociación SSL/TLS tiene comienzo cuando ya se ha establecido la conexión. Por el contrario, en el explícito, la negociación se inicia al llamar al método __execTLS()__ y que el servidor acepte dicho comando.
+
+
+La autenticación SMTP puede darse de varias formas, gestionadas por la clase ya vista, __AuthenticatingSMTPClient__, que permite al cliente iniciar sesión mediante alguno de los métodos de autenticación que soporte el servidor. Tiene varios constructores para acomodarse a distintos protocolos o codificaciones. Los métodos más relevantes son __auth__ y __ehlo__ que envían los mensajes AUTH (con el método y los valores de usuario/password) y EHLO al servidor (con el nombre del servidor), respectivamente.
+
+```java
+import java.io.IOException;
+import java.io.Writer;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.spec.InvalidKeySpecException;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import org.apache.commons.net.smtp.*;
+
+public class ClienteSMTPAutenticado {
+	public static void main(String[] args) throws NoSuchAlgorithmException, UnrecoverableKeyException,
+			KeyStoreException, InvalidKeyException, InvalidKeySpecException {
+
+		// se crea cliente SMTP seguro
+		AuthenticatingSMTPClient client = new AuthenticatingSMTPClient();
+
+		// datos del usuario y del servidor
+		String server = "smtp.gmail.com";
+		String username = "correo@gmail.com";
+		String password = "claveusuario";
+		int puerto = 587;
+		String remitente = "correo@gmail.com";
+
+		try {
+			int respuesta;
+
+			// Se crea la clave para establecer un canal seguro
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			kmf.init(null, null);
+			KeyManager km = kmf.getKeyManagers()[0];
+
+			// Conexión al servidor SMTP
+			client.connect(server, puerto);
+			System.out.println("1 - " + client.getReplyString());
+			
+			// Establecimiento de la clave para la comunicación segura
+			client.setKeyManager(km);
+
+			respuesta = client.getReplyCode();
+			if (!SMTPReply.isPositiveCompletion(respuesta)) {
+				client.disconnect();
+				System.err.println("Conexión rechazada.");
+				System.exit(1);
+			}
+
+			// se envía el commando EHLO
+			client.ehlo(server);
+			System.out.println("2 - " + client.getReplyString());
+
+			// Necesita negociación TLS - MODO NO IMPLICITO
+			
+			// Se ejecuta el comando STARTTLS y se comprueba si es true
+			if (client.execTLS()) {
+				System.out.println("3 - " + client.getReplyString());
+
+				// se realiza la autenticación con el servidor
+				if (client.auth(AuthenticatingSMTPClient.AUTH_METHOD.LOGIN, username, password)) {
+					System.out.println("4 - " + client.getReplyString());
+					String destino1 = "fulanito@gmail.com";
+					String asunto = "Prueba de SMTPClient con Gmail";
+					String mensaje = "Esto es una prueba de mensaje con usuario autenticado desde Java.";
+					// se crea la cabecera
+					SimpleSMTPHeader cabecera = new SimpleSMTPHeader(remitente, destino1, asunto);
+
+					// el nombre de usuario y el email de origen coinciden
+					client.setSender(remitente);
+					client.addRecipient(destino1);
+					System.out.println("5 - " + client.getReplyString());
+
+					// se envia DATA
+					Writer writer = client.sendMessageData();
+					if (writer == null) { // fallo
+						System.out.println("Fallo al enviar DATA.");
+						System.exit(1);
+					}
+
+					writer.write(cabecera.toString()); // cabecera
+					writer.write(mensaje);// luego mensaje
+					writer.close();
+					System.out.println("6 - " + client.getReplyString());
+
+					boolean exito = client.completePendingCommand();
+					System.out.println("7 - " + client.getReplyString());
+
+					if (!exito) { // fallo
+						System.out.println("Fallo al finalizar transacción.");
+						System.exit(1);
+					} else
+						System.out.println("Mensaje enviado con exito......");
+
+				} else
+					System.out.println("USUARIO NO AUTENTICADO.");
+			} else
+				System.out.println("FALLO AL EJECUTAR  STARTTLS.");
+
+		} catch (IOException e) {
+			System.err.println("Could not connect to server.");
+			e.printStackTrace();
+			System.exit(1);
+		}
+		try {
+			client.disconnect();
+		} catch (IOException f) {
+			f.printStackTrace();
+		}
+
+		System.out.println("Fin del envío.");
+		System.exit(0);
+	}
+}
+```
 
 
 
