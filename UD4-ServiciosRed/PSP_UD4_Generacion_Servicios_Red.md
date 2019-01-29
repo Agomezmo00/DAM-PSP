@@ -418,8 +418,36 @@ public class ClienteSMTPAutenticado {
 ```
 
 
+### Otros protocolos involucrados en el envío/acceso a emails
+
+* Protocolo de Oficina de Correo [POP](https://es.wikipedia.org/wiki/Protocolo_de_oficina_de_correo). La versión actual es la 3 y habitualmente se suele referir a dicho protocolo exclusivamente en referencia a dicha versión como POP3. Las clases Java que modelan el acceso a un servidor POP3 están incluidas en Apache Commons Net y son:
+
+	* [POP3Client](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/pop3/POP3Client.html). De forma a análoga a SMTPClient, implementa el lado cliente de POP3
+	* [POP3SClient](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/pop3/POP3SClient.html). Versión con soporte SSL de la clase anterior
+	* [POP3MessageInfo](https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/pop3/POP3MessageInfo.html). Modela la obtención de información de los mensajes presentes en el servidor POP3
 
 
+##### Comandos POP3
 
+
+| Comando	| Descripción |
+|-----------|-------------|
+| USER | identification	Este comando permite la autenticación. Debe estar seguido del nombre de usuario, es decir, una cadena de caracteres que identifique al usuario en el servidor. El comando USER debe preceder al comando password
+| PASS | El comando PASS permite especificar la contraseña del usuario cuyo nombre ha sido especificado por un comando USER previo. |
+| STAT	| Información acerca de los mensajes del servidor |
+| RETR num |	Número del mensaje a recuperar |
+| DELE num |	Número del mensaje a eliminar |
+| LIST [msg] |	Número del mensaje a mostrar |
+|NOOP |	Permite mantener la conexión abierta en caso de inactividad |
+|TOP <messageID> <n>	| Comando que muestra n líneas del mensaje, cuyo número se da en el argumento. En el caso de una respuesta positiva del servidor, éste enviará de vuelta los encabezados del mensaje, después una línea en blanco y finalmente las primeras n líneas del mensaje |
+|UIDL [msg] |	Solicitud al servidor para que envíe una línea que contenga información sobre el mensaje que eventualmente se dará en el argumento. Esta línea contiene una cadena de caracteres denominada unique identifier listing (lista de identificadores únicos) que permite identificar de manera única el mensaje en el servidor, independientemente de la sesión. El argumento opcional es un número relacionado con un mensaje existente en el servidor POP, es decir, un mensaje que no se ha borrado|
+| QUIT | El comando QUIT solicita la salida del servidor POP3. Lleva a la eliminación de todos los mensajes marcados como eliminados y envía el esta acción. |
+
+* Internet Message Access Protocol [IMAP](https://es.wikipedia.org/wiki/Protocolo_de_acceso_a_mensajes_de_Internet). Más moderno que POP3. Actualmente en la versión 4. Almacena los mensajes en el servidor (POP3 no).
+
+	* [IMAPClient](http://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/imap/IMAPClient.html)
+	* [IMAPSClient](http://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/imap/IMAPSClient.html)
+
+* Multipurpose Internet Mail Extensions [MIME](https://es.wikipedia.org/wiki/Multipurpose_Internet_Mail_Extensions)
 
 ## Servidores Java
