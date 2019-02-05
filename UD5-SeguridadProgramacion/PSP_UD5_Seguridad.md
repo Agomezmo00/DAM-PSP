@@ -20,7 +20,7 @@ En Java existen herramientas tanto para implantar los mecanismos de criptografí
 * Elegir la tecnología más adecuada que se conozca o que se pueda investigar.
 * Evitar copiar y pegar código de terceros a menos que se entienda bien su cometido. Copiar != reutilizar.
 * Asegurar en la medida de lo posible que las librerías o frameworks que se utilicen no estén comprometidas por vulnerabilidades conocidas.
-* 
+
 
 ### Cuestiones a tener en cuenta para crear programas seguros
 
