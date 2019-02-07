@@ -98,7 +98,8 @@ El __receptor__ por su parte separa el mensaje de la firma que ha recibido, apli
 
 
 ![alt text][digitalSignature]
-[digitalSignature]: https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png "digital Signature Process Fuente: https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png"
+
+[digitalSignature]: https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png "digital Signature Process Fuente https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png"
 
 
 ### Certificados digitales
