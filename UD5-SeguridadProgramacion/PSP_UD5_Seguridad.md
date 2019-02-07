@@ -97,10 +97,6 @@ El __receptor__ por su parte separa el mensaje de la firma que ha recibido, apli
 *mh1* y *mh2* deben ser iguales para garantizar la validez de la firma digital.
 
 
-![alt text][crypto]
-
-
-
 ![alt text][digitalSignature]
 [digitalSignature]: https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png "digital Signature Process Fuente: https://upload.wikimedia.org/wikipedia/commons/9/94/Digital_signature_process.png"
 
