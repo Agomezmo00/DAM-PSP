@@ -123,8 +123,6 @@ El Certificado Digital es el único medio que permite garantizar técnica y lega
 
 ### Control de acceso
 
-
-
 * Identificación. El usuario provee datos de sí mismo.
 * Autenticación. *La autenticación o autentificación1​es el acto o proceso de confirmar que algo (o alguien) es quien dice ser* [Fuente](https://es.wikipedia.org/wiki/Autenticación)
 * Autorización. *Se usa para decidir si la persona, programa o dispositivo "X" tiene permiso para acceder al dato, funcionalidad o servicio Y.* [Fuente](https://es.wikipedia.org/wiki/Autorización)
@@ -135,12 +133,123 @@ El Certificado Digital es el único medio que permite garantizar técnica y lega
 
 ### [Introducción](https://www.uv.es/sto/cursos/seguridad.java/html/sjava-1.html)
 
+* ¿Qué quiere decir que un lenguaje de programación es seguro? Las maneras en que un lenguaje de programación puede causar vulnerabilidades en las aplicaciones, las comunicaciones o en la integridad de datos son diversas. Estos problemas están muy relacionados con el acceso a memoria. Para solucionarlos, Java se diseñó eliminando características de otros lenguajes tales como:
+
+	* Eliminación de la aritmética con punteros. Java la elimina por completo la aritmética con punteros, que es una de las mayores fuentes de accesos ilegales a memoria en otros lenguajes. Java maneja el concepto de la referencia, que permite definir estructuras dinámicas complejas como listas, colas, árboles, etc. igual que en otros lenguajes.
+
+	* Comprobación de rangos en el acceso a vectores. Se produce una excepción cuando se intenta efecturar accesos fuera de rango.  
+
+	* Definición del comportamiento de las variables sin inicializar. En Java toda la memoria del heap se inicializa automáticamente, y la memoria de la pila, que es la que emplean las variables locales, debe ser inicializada por el programador (si en un programa se intenta usar una variable local antes de asignarle un valor el compilador genera un error.
+
+	* Eliminación de la liberación de memoria controlada directamente por el programador, mediante el recolector de basura.
+
+* Otros aspectos que contribuyen a reforzar la seguridad en Java son:
+
+	* La verificación de tipos en tiempo de compilación, para garantizar que las variables son de los tipos correctos.
+
+	* Establecimiento de  niveles de acceso a los atributos y métodos de las clases, que permite controlar su visiblidad.
+
+	* El modificador __final__, para poder impedir que se definan subclases cuando se aplica a una clase o que se puedan redefinir atributos.
+
+Como se conoce previamente, en Java, la ejecución del código pasa por una compilación a bytecodes que posteriormente son interpretados por la Máquina virtual Java (JVM). Además, previamente a que la JVM empiece a interpretar los bytecodes, debe realizar una serie de tareas para preparar el entorno en el que se ejecutará el programa. Aquí interviene la seguridad interna de Java, donde hay tres componentes:
+
+
+* [Cargador de clases](http://eljaviador.com/cargador-de-clases.html). 
+
+	* Este elemento separa las clases que carga para evitar ataques. Existen 3 tipo de cargadores:
+		* Bootstrap ClassLoader : Carga las clases de /lib del JRE
+		* Extensions ClassLoader : Carga las clases de /lib/ext de JRE
+		* System ClassLoader : Carga el classpath. También llamado Application ClassLoader
+
+* Verificador de archivos de clases. 
+	
+	* Se ocupa de validar los bytecodes. El sistema distingue entre código considerado fiable (generalmente las clases del sistema y las validadas por el usuario) y código no fiable. Las clases de origen *fiable* no se validan, pero el resto sí.
+
+* Gestor de seguridad (SecurityManager).
+
+	* Comprueba el acceso en tiempo de ejecución en aspectos tales como si el proceso actual puede acceder a un package o fichero concreto, si puede crear un subproceso, aceptar conexiones desde un host o puerto concreto, etc. 
+
+	* El SecurityManager se puede instalar configurando la propiedad del sistema java.security.manager en la línea de comandos al iniciar la JVM: ```java -Djava.security.manager <main class name>``` o programáticamente desde el código de Java: ```System.setSecurityManager(new SecurityManager())```. Vemos un ejemplo del acceso a la información sin y con gestor.
+
+```java
+public class PropiedadesSistema {
+	public static void main(String[] args) {	
+		String t[] = { "os.name", "os.version", 
+					"user.dir", "user.home", "user.name"
+					"java.class.path", "java.home", 
+					"java.vendor", "java.version"};
+        
+		for (int i = 0; i < t.length; i++) {
+			System.out.print("Propiedad:" + t[i]);
+			try {
+				String s = System.getProperty(t[i]);
+				System.out.println("\t==> " + s);
+			} catch (Exception e) {
+				System.err.println("\n\tExcepción " + e.toString());
+			}
+		}
+	}
+}
+```
+
+[Ejemplo de configuración del gestor de seguridad](https://fluidattacks.com/web/es/defends/java/configurar-gestor-seguridad/)
+
+### Ficheros de políticas en Java
+
+El Java SecurityManager estándar otorga permisos sobre la base de una *Política*, que se define en un __fichero de políticas__. Si no se especifica ningún archivo de políticas, se utilizará el archivo de políticas predeterminado en $JAVA_HOME/lib/security/java.policy. 
+
+El fichero __java.security__ (ubicado en $JAVA_HOME/conf/security) recoge las localizaciones de los distintos ficheros de políticas. Así se pueden definir varios ficheros de políticas (por ejemplo uno distinto para cada aplicación) y dichos ficheros pueden estar en ubicaciones diferentes. 
+
+#### Grant
+
+El fichero de políticas recoge los permisos habilitados para la aplicación a la que se aplica. Mediante la sentencia __grant__ se especifican los permisos.
+
+La ejecución de un programa con una política de seguridad concreta es: ```java -Djava.security.policy=nombreFichero.policy nombreAplicacion```
+
+Se utiliza para conceder permisos del sistema y contiene una secuencia de entradas (denominadas grant cada una de ellas porque empiezan por esta sentencia), cada una de ellas tiene una o más entradas, el formato básico es el siguiente:
+
+```java
+grant codeBase "URL"{
+      permission Nombre_clase "Nombre_destino", "Acción";
+      permission Nombre_clase "Nombre_destino", "Acción";
+}
+```
+
+A la derecha de *codeBase* se indica la ubicación del código base sobre el que se van a definir los permisos. Su valor es una URL y siempre se debe utiliza la barra diagonal (/ incluso en Windows) como separador de directorio. Por ejemplo: ```grant codeBase “file:/C:/path/to/directory/”```
+
+Si no se especifica *codeBase* los permisos se aplican a todas las fuentes.
+
+*Nombre_clase* contiene el nombre de la clase de permisos, por ejemplo:
+java.io.FilePermission (representa acceso a fichero o directorio)
+java.net.SocketPermission (acceso a la red vía socket)
+java.util.PropertyPermission (permiso sobre propiedades del sistema), etc.
+
+El parámetro *Nombre_destino* especifica el destino del permiso y depende de la clase de permiso.
+Por ejemplo si la clase de permiso es java.io.FilePermission en *Nombre_destino* se puede poner un fichero o un directorio; si la clase es java.net.SocketPermission se pondría un servidor y un número de puerto; si es java.util.PropertyPermission se pondría una propiedad del sistema.
+
+En el parámetro *Acción* se indica una lista de acciones separadas por comas, por ejemplo read, write, delete o execute para una clase de permiso java.io.FilePermission; accept, listen, connect, resolve para una clase de permiso java.netSocketPermission; read, write para una clase de permiso java.util.PropertyPermission.
+
+[Referencia permisos EN](http://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html)
+
+
+Se puede consultar los permisos, sus destinos y acciones.
+
+[Ejemplos de ficheros de Políticas](http://www.programandoapasitos.com/2016/03/procesos-y-servicios-programacion_24.html)
+
+
+#### PolicyTool
+
+Es una herramienta para facilitar las tareas de gestión de políticas; Crear y modificar los archivos externos de configuración de política que definen la política de seguridad Java de la instalación. [Tutorial oficial Oracle EN](https://docs.oracle.com/javase/tutorial/security/tour1/wstep1.html)
+
+
+
+## Recursos
+
 * [JCA Referencia oficial EN](https://docs.oracle.com/javase/9/security/java-cryptography-architecture-jca-reference-guide.htm#JSSEC-GUID-2BCFDD85-D533-4E6C-8CE9-29990DEB0190)
 * [JSSE Referencia oficial EN](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html)
 * [JAAS Referencia oficial EN](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html)
 
-
-## Recursos de buenas prácticas
+### Buenas prácticas
 
 [INCIBE](https://www.incibe.es)
 
