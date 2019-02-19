@@ -241,7 +241,69 @@ Se puede consultar los permisos, sus destinos y acciones.
 
 Es una herramienta para facilitar las tareas de gestión de políticas; Crear y modificar los archivos externos de configuración de política que definen la política de seguridad Java de la instalación. [Tutorial oficial Oracle EN](https://docs.oracle.com/javase/tutorial/security/tour1/wstep1.html)
 
+## Criptografía en Java. JCA
 
+[JCA, Java Cryptography Architecture](https://docs.oracle.com/javase/9/security/java-cryptography-architecture-jca-reference-guide.htm#JSSEC-GUID-2BCFDD85-D533-4E6C-8CE9-29990DEB0190) es un *framework* para acceder y desarrollar funciones criptográficas en Java. Se basa en dos principios:
+
+* Idependencia e interoperabilidad de las implementaciones:
+
+	* La independencia de la implementación se consige empleando una __arquitectura basada en proveedores__. Un *proveedor* de servicios criptográficos puede definirse como un __paquete o conjunto de ellos que proporciona una implementación concreta de aspectos criptográficos de la API de seguridad de Java__ tales como algoritmos de firmado, funciones de dispersión o conversión de claves. Los proveedores deben poder cambiarse de modo transparente para las aplicaciones.
+
+	* La interoperabilidad de las implementaciones significa que cada una de ellas puede trabajar con el resto, utilizar claves generadas por otra implementación o verificar sus claves.
+
+* Independencia y extensibilidad de los algoritmos:
+
+	* La independencia de los algoritmos se consigue definiendo tipos de servicios criptográficos y definiendo clases que proporcionan la funcionalidad de estos servicios. Estas clases se denominan *clases motor* y ejemplos de ellas son las clases MessageDigest, Signature y KeyFactory.
+
+	* La extensibilidad de los algoritmos significa que nuevos algoritmos que entren dentro de alguno de los tipos soportados (compatibles con las clases motor) puedan ser añadidos fácilmente.
+
+
+[Recurso](http://www.programandoapasitos.com/2016/03/procesos-y-servicios-programacion_25.html)
+
+
+JCA comprende por lo tanto:
+
+* El marco que define y apoya los servicios criptográficos para que los proveedores faciliten implementaciones. Este marco incluye paquetes como:
+
+	* java.security.cert
+	* java.security.spec
+	* java.security.interfaces
+	* javax.crypto
+	* javax.crypto.spec
+	* javax.crypto.interfaces
+
+* Los proveedores reales, tales como Sun, SunJCE, SunRsaSign... las implementaciones criptográficas reales. El proveedor es el encargado de proporcionar la implementación de uno o varios algoritmos al programador. Los proveedores de seguridad se definen en el fichero java.security situado en la carpeta *java.home\lib\security*. Forman una lista de entradas con un número que indican el orden de búsqueda cuando en los programas no se especifica un proveedor.
+
+	* security.provider.1=sun.security.provider.Sun
+	* security.provider.2=sun.security.rsa.SunRsaSign
+	* security.provider.3=com.sun.net.ssl.internal.ssl.Provider
+	* security.provider.4=com.sun.crypyo.provider.SunJCE
+	* security.provider.5=sun.security.jgss.SunProvider
+
+
+
+JCA define el concepto de proveedor mediante la clase [Provider](https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html) del paquete java.security. Se trata de una clase abstracta que debe ser redefinida por clases proveedor específicas.
+
+Existen dos modos de añadir o eliminar los proveedores instalados en un sistema:
+
+* Estáticamente, editando las entradas del fichero java.security
+
+* Dinámicamente, invocando desde el programa los métodos addProvider() o insertProvider() de la clase java.security.Security para añadirlos o al método removeProvider()
+
+* Si se desea saber los proveedores disponibles puede emplear los métodos getProvider("nombre") (para saber si un proveedor concreto está instalado) o getProviders() (que retorna un vector de cadenas con los nombres de los proveedores).
+
+### Resúmenes de Mensajes. [Message-Digest](https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html)
+
+Se trata de una marca digital asociada a un bloque de datos. Algoritmos que se han visto y procesan este tipo de resúmenes son sha-1 y md5. También se suelen denominar checksum. Aunque las implementaciones pueden variar hay dos propiedades comunes a este tipo de algoritmos:
+
+* No deben revelar nada sobre la entrada que lo generó.
+* Es imposible (o debería) encontrar dos mensajes con el mismo valor.
+
+
+
+## Comunicaciones seguras en Java
+
+## Control de acceso en Java
 
 ## Recursos
 
