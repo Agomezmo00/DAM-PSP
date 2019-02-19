@@ -84,6 +84,8 @@ También denominadas [funciones de resumen](https://es.wikipedia.org/wiki/Funci�
 
 Este tipo de funciones se emplean por ejemplo en mecanismos de firma digital. Los algoritmos más utilizados de este tipo son [MD5](https://es.wikipedia.org/wiki/MD5) y los del tipo [SHA](https://es.wikipedia.org/wiki/Secure_Hash_Algorithm)
 
+[Software para calcular md5 de ficheros en Windows](https://www.microsoft.com/en-us/download/details.aspx?id=11533)
+
 
 ### Firma digital
 
@@ -282,7 +284,7 @@ JCA comprende por lo tanto:
 
 
 
-JCA define el concepto de proveedor mediante la clase [Provider](https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html) del paquete java.security. Se trata de una clase abstracta que debe ser redefinida por clases proveedor específicas.
+JCA define el concepto de proveedor mediante la clase [provider](https://docs.oracle.com/javase/9/security/java-cryptography-architecture-jca-reference-guide.htm#JSSEC-GUID-D8E30FE5-66B4-4F6A-88B7-280789E68307) [javadoc](https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html) del paquete java.security. Se trata de una clase abstracta que debe ser redefinida por clases proveedor específicas.
 
 Existen dos modos de añadir o eliminar los proveedores instalados en un sistema:
 
@@ -298,6 +300,13 @@ Se trata de una marca digital asociada a un bloque de datos. Algoritmos que se h
 
 * No deben revelar nada sobre la entrada que lo generó.
 * Es imposible (o debería) encontrar dos mensajes con el mismo valor.
+
+
+### Generación y comprobación de firmas digitales. 
+
+Como ya se ha visto, el objetivo de las firmas digitales es aseverar la autenticidad del origen y el contenido de una información. La clase *[KeyPairGenerator](https://docs.oracle.com/javase/9/security/java-cryptography-architecture-jca-reference-guide.htm#JSSEC-GUID-71693272-7F57-4155-99F9-A2139271FD6D)* modela la creación de pares de claves.
+
+
 
 
 
