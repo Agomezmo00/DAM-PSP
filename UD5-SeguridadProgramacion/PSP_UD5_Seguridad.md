@@ -308,9 +308,9 @@ Como ya se ha visto, el objetivo de las firmas digitales es aseverar la autentic
 
 
 
-
-
 ## Comunicaciones seguras en Java
+
+[Recurso](http://www.programandoapasitos.com/2016/03/procesos-y-servicios-programacion_26.html)
 
 ## Control de acceso en Java
 
