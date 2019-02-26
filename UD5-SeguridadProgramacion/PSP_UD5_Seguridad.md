@@ -312,13 +312,65 @@ Como ya se ha visto, el objetivo de las firmas digitales es aseverar la autentic
 
 [Recurso](http://www.programandoapasitos.com/2016/03/procesos-y-servicios-programacion_26.html)
 
+### SSLSocket y SSLServerSocket
+
+Modelan los comportamientos ya vistos en la UD3 mediante el uso del protocolo SSL. Vemos ejemplo de servidor y cliente.
+
 ## Control de acceso en Java
+
+ En Java, hay definida una interfaz, denominada [JAAS](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html)  (Java Authentication and Authorization Service, Servicio de Autorización y Autenticación de Java) que permite gestionar los servicios de control de autenticación y acceso en las aplicaciones.
+
+Se puede utilizar para dos propósitos:
+* Para la __autenticación__ de usuarios, es decir, determinar de forma fiable y segura quién está ejecutando nuestro código Java
+
+* Para la __autorización__ de los usuarios; asegurar que quien ejecuta una determinada funcionalidad tiene los permisos necesarios para llevar a cabo dicha acción.
+
+En estos procesos están involucradas las clases e interfaces:
+
+* LoginContext, contexto de inicio de sesión: clase para iniciar y gestionar el proceso de autenticación mediante la creación de un Subject. La autenticación se hace llamando al método login().
+
+* LoginModule, módulo de conexión: interfaz para definir los mecanismos de autenticación. Se deben implementar los siguientes métodos: iniatilize(), login(), commit(), abort() y logout(). Se encarga de validar los datos en un proceso de autenticación.
+
+* Subject, clase para representar a un ente autenticable (entidad, usuario, sistema).
+
+* Principal, clase que representa los atributos que posee cada Subject recuperado una vez que se efectúa el ingreso a la aplicación. Un Subject puede contener varios principales.
+
+* CallBackHandler, encargado de la interacción con el usuario para obtener los datos necesarios para la autenticación. Se debe implementar el método handle().
+
+* Los paquetes en los que están disponibles las clases e interfaces principales de JAAS son:
+	* javax.security.auth.* que contiene las clases de base e interfaces para los mecanismos de autenticación y autorización.
+	* javax.security.auth.callback.* que contiene las clases e interfaces para definir las credenciales de autenticación de la aplicación.
+	* javax.security.auth.login.* que contiene las clases para entrar y salir de un dominio de aplicación.
+	* javax.security.auth.spi.* que contiene las interfaces para un proveedor de JAAS para implementar módulos JAAS.
+
+
+### Proceso de autenticación JAAS
+
+De la forma más básica, la autenticación JAAS consta de los pasos siguientes:
+
+1. Creación de una instancia de LoginContext, uno o más LoginModulo son cargados basándose en el archivo de configuración de JAAS.
+2. La instanciación de cada LoginModule es opcionalmente provista con un CallbackHandler que gestionará el proceso de comunicación con el usuario para obtener los datos con los que este tratará de autenticarse.
+3. Invocación del método login() del LoginContext el cual invocará el método login() del LoginModule.
+4. Los datos del usuario se obtienen por medio del CallbackHandler.
+5. El LoginModule comprueba los datos introducidos por el usuario y los valida. Si la validación tiene éxito el usuario queda autenticado.
+
+
+### Proceso de autorización JAAS
+
+Se basa en el uso de políticas de seguridad. Una vez autenticado un usuario mediante JAAS, se establece un *Subject* que representa al usuario. Dicho *Subject* se compone de un conjunto de principales, donde cada principal representa un atributo para el usuario en cuestión, por ejemplo el nombre y DNI de una persona constituyen dos principales. Para poder llevar a cabo la autorización, es necesario:
+
+* El usuario debe autenticarse como se ha contemplado previamente.
+* En el fichero de políticas se deben configurar entradas para los principales
+* Se debe asociar al *Subject* el contexto de control de acceso actual usando los métodos doAs() o doAsPrivileged() de la clase Subject.
+
 
 ## Recursos
 
 * [JCA Referencia oficial EN](https://docs.oracle.com/javase/9/security/java-cryptography-architecture-jca-reference-guide.htm#JSSEC-GUID-2BCFDD85-D533-4E6C-8CE9-29990DEB0190)
 * [JSSE Referencia oficial EN](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html)
 * [JAAS Referencia oficial EN](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html)
+
+* [Manejo de certificados con keytool](https://www.adictosaltrabajo.com/2005/09/09/security-ssl-keytool/)
 
 ### Buenas prácticas
 
